@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,16 +23,29 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const Page: React.FC = () => {
+  const router = useRouter();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
-    }
+    },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async (values: FormValues) => {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      body: JSON.stringify(values),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+    });
+    if (response.ok)
+      router.push("/budget-select");
   }
 
   return (
@@ -45,7 +59,7 @@ const Page: React.FC = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full items-center">
               <EmailFormControl control={form.control} name="email" />
               <PasswordFormControl control={form.control} name="password" dispName="Password" />
-              <Button type="submit" className="w-1/3">Login</Button>
+              <Button type="submit" className="w-1/3" disabled={isSubmitting}>Login</Button>
             </form>
           </Form>
         </CardContent>

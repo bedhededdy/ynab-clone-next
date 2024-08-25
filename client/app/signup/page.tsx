@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +27,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const Page: React.FC = () => {
+  const router = useRouter();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,15 +38,26 @@ const Page: React.FC = () => {
     }
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
+  const { isSubmitting } = form.formState;
+
+  const onSubmit = async (values: FormValues) => {
+    const response = await fetch("/api/signup", {
+      method: "POST",
+      body: JSON.stringify(values),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      }
+    });
+    if (response.ok)
+      router.push("/login");
   }
 
   return (
     <main className="min-w-dvw min-h-dvh flex justify-center items-center">
       <Card>
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Sign Up</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -51,7 +65,7 @@ const Page: React.FC = () => {
               <EmailFormControl control={form.control} name="email" />
               <PasswordFormControl control={form.control} name="password" dispName="Password" />
               <PasswordFormControl control={form.control} name="confirmPassword" dispName="Confirm Password" />
-              <Button type="submit" className="w-1/3">Login</Button>
+              <Button type="submit" className="w-1/3" disabled={isSubmitting}>Sign Up</Button>
             </form>
           </Form>
         </CardContent>
