@@ -1,38 +1,56 @@
 package com.ynab.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ynab.repository.UserRepository;
-import com.ynab.model.Budget;
 import com.ynab.model.User;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
+
+    @Autowired
+    @Lazy // AuthenticationManager requires the UserService, so we need to specify @Lazy to resolve the circular dependency
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private UserRepository userRepository;
 
-    public Long login(String email, String password) {
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            if (user.getPassword().equals(password))
-                return user.getId();
-        }
-        return -1L;
+    @Autowired
+    private TokenService tokenService;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) {
+        return getUserByEmail(email);
     }
 
-    public Long register(String email, String password) {
-        if (userRepository.findByEmail(email) != null)
-            return -1L;
-        User user = new User(email, password);
-        user = userRepository.save(user);
-        return user.getId();
+    public String login(String email, String password) {
+        // *ECP FIXME: NEED TO VERIFY THE USERNAME AND PASSWORD FIRST
+        var usernamePassword = new UsernamePasswordAuthenticationToken(email, password);
+        var authUser = authenticationManager.authenticate(usernamePassword);
+        String accessToken = tokenService.generateAccessToken((User) authUser.getPrincipal());
+        return accessToken;
+
+    }
+
+    public UserDetails register(String email, String password) throws Exception {
+        if (getUserByEmail(email) != null)
+            throw new Exception("User already exists");
+        String encryptedPassword = new BCryptPasswordEncoder().encode(password);
+        return userRepository.save(new User(email, encryptedPassword));
     }
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }

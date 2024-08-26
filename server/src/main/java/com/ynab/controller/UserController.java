@@ -27,13 +27,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Long> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
         if (loginRequest.email == null || loginRequest.email.isBlank() || loginRequest.password == null || loginRequest.password.isBlank())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        Long userId = userService.login(loginRequest.email, loginRequest.password);
-        if (userId == -1L)
+        String jwt = userService.login(loginRequest.email, loginRequest.password);
+        if (jwt.isBlank())
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        return ResponseEntity.ok(userId);
+        return ResponseEntity.ok(jwt);
     }
 
     @Data
@@ -43,12 +43,15 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Long> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
         if (registerRequest.email == null || registerRequest.email.isBlank() || registerRequest.password == null || registerRequest.password.isBlank())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        Long userId = userService.register(registerRequest.email, registerRequest.password);
-        if (userId == -1L)
+
+        try {
+            userService.register(registerRequest.email, registerRequest.password);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User created");
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+        }
     }
 }
