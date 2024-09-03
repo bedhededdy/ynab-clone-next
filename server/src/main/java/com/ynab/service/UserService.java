@@ -4,12 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ynab.repository.UserRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.ynab.model.User;
 
 @Service
@@ -31,10 +35,9 @@ public class UserService implements UserDetailsService {
     }
 
     public String login(String email, String password) {
-        // *ECP FIXME: NEED TO VERIFY THE USERNAME AND PASSWORD FIRST
         var usernamePassword = new UsernamePasswordAuthenticationToken(email, password);
-        var authUser = authenticationManager.authenticate(usernamePassword);
-        String accessToken = tokenService.generateAccessToken((User) authUser.getPrincipal());
+        Authentication authUser = authenticationManager.authenticate(usernamePassword);
+        String accessToken = tokenService.generateAccessToken((User)authUser.getPrincipal());
         return accessToken;
 
     }
@@ -44,6 +47,16 @@ public class UserService implements UserDetailsService {
             throw new Exception("User already exists");
         String encryptedPassword = new BCryptPasswordEncoder().encode(password);
         return userRepository.save(new User(email, encryptedPassword));
+    }
+
+    public User getUserFromRequest(HttpServletRequest request) {
+        String token = tokenService.recoverToken(request);
+        if (token == null)
+            return null;
+        String email = tokenService.extractEmailFromToken(token);
+        if (email == null)
+            return null;
+        return getUserByEmail(email);
     }
 
     public User getUserById(Long userId) {
