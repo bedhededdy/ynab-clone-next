@@ -44,8 +44,14 @@ const Page: React.FC = () => {
         "Accept": "application/json"
       },
     });
-    if (response.ok)
+
+    if (response.ok) {
       router.push("/budget-select");
+    } else {
+      const message = response.status >= 500 ? "Server error" : "Invalid email or password";
+      form.setError("email", { message });
+      form.setError("password", { message });
+    }
   }
 
   return (

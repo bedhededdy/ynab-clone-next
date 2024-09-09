@@ -49,8 +49,12 @@ const Page: React.FC = () => {
         "Accept": "application/json"
       }
     });
-    if (response.ok)
+    if (response.ok) {
       router.push("/login");
+    } else {
+      const message = response.status >= 500 ? "Server error" : "User already registered with this email";
+      form.setError("email", { message });
+    }
   }
 
   return (
