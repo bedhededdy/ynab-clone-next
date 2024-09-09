@@ -8,12 +8,12 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent, CardTitle, CardFooter } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
+import { Button } from "@/app/_components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle, CardFooter } from "@/app/_components/ui/card";
+import { Form } from "@/app/_components/ui/form";
 
-import EmailFormControl from "@/components/EmailFormControl";
-import PasswordFormControl from "@/components/PasswordFormControl";
+import EmailFormControl from "@/app/_components/EmailFormControl";
+import PasswordFormControl from "@/app/_components/PasswordFormControl";
 
 const formSchema = z.object({
   email: z.string().email(),

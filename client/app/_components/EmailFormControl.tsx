@@ -1,6 +1,6 @@
 import { Control, FieldValues, Path } from "react-hook-form";
-import { FormItem, FormLabel, FormControl, FormMessage, FormField } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { FormItem, FormLabel, FormControl, FormMessage, FormField } from "@/app/_components/ui/form";
+import { Input } from "@/app/_components/ui/input";
 
 interface IEmailFormControlProps<T extends FieldValues> {
   control: Control<T>;
