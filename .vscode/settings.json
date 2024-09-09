@@ -1,10 +1,4 @@
 {
-    "[typescript]": {
-        "editor.tabSize": 2
-    },
-    "[typescriptreact]": {
-        "editor.tabSize": 2
-    },
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "interactive",
 }
