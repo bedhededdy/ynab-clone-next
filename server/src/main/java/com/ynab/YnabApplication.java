@@ -9,5 +9,5 @@ public class YnabApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(YnabApplication.class, args);
 	}
-
 }
+

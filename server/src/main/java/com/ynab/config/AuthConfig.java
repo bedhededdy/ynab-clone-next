@@ -24,6 +24,8 @@ public class AuthConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // It is safe to disable CSRF because we are restricting
         // CORS to only allow requests from the client
+        // Also need to allow iframes since or else H2 console gets blocked
+        // FIXME: DON'T ALLOW H2 ACCESS OR IFRAMES IN PRODUCTION
         return http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
